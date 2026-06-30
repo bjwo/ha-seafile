@@ -19,6 +19,12 @@ for KEYS in "${arr[@]}"; do
     if [[ "${KEYS}" == "env_vars" ]]; then
         continue
     fi
+    # MYSQL_* vars are handled by the MariaDB section below with the correct
+    # resolved values; skip them here to avoid injecting empty values that
+    # would override the real ones in the upstream shell scripts.
+    if [[ "${KEYS}" == MYSQL_* ]]; then
+        continue
+    fi
     # export key
     VALUE=$(jq ."$KEYS" "${JSONSOURCE}")
     line="${KEYS}='${VALUE//[\"\']/}'"
