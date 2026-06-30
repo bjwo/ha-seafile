@@ -1,6 +1,13 @@
 # Changelog
 
-## 12.0.18-5
+## 12.0.18-6
+
+### Changes
+
+- Removed `SERVER_IP` option — redundant now that `url` is required.
+- `FILE_SERVER_ROOT` is now optional; when omitted it is auto-derived from `url` by replacing the port with the value of `PORT` (default `8082`). Set it explicitly only if your file server is reachable at a different host or URL.
+- Fixed `MYSQL_*` env vars being injected with empty values before the MariaDB credential resolution runs, causing Seafile's init script to see blank passwords.
+
 
 ### Breaking changes
 
