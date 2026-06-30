@@ -66,6 +66,8 @@ devices:
   - /dev/nvme2
 environment:
   NOSWAG: "1"
+  PUID: "0"
+  GUID: "0"
 map:
   - addon_config:rw
   - share:rw
@@ -117,5 +119,5 @@ services:
 slug: seafile
 udev: true
 url: https://github.com/bjwo/ha-seafile/tree/main/seafile
-version: "12.0.18-8"
+version: "12.0.18-9"
 webui: http://[HOST]:[PORT:8000]

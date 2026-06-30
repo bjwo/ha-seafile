@@ -65,9 +65,6 @@ if [[ ! -e "${DATA_LOCATION}/conf" ]]; then
     ln -s /config/conf "${DATA_LOCATION}/conf"
 fi
 
-chown -R seafile:seafile "$DATA_LOCATION"
-chown -R seafile:seafile /config/conf
-
 # Patch the upstream entrypoint to use DATA_LOCATION instead of /shared
 sed -i "s|/shared|${DATA_LOCATION}|g" /docker_entrypoint.sh
 sed -i "s|/shared|${DATA_LOCATION}|g" /home/seafile/*.sh
