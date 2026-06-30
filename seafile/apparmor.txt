@@ -1,0 +1,35 @@
+"profile seafile_addon flags=(attach_disconnected,mediate_deleted)" {
+  capability chown,
+  capability dac_override,
+  capability dac_read_search,
+  capability fowner,
+  capability net_admin,
+  capability setgid,
+  capability setuid,
+  capability sys_chroot,
+  capability sys_admin,
+
+  network udp,
+  network tcp,
+  network inet,
+  network inet6,
+  network netlink raw,
+  network packet raw,
+
+  /init ix,
+  /run/s6-rc** ix,
+  /package/** ix,
+  /command/** ix,
+
+  /dev/fuse rw,
+  /dev/sd* rw,
+  /dev/nvme* rw,
+  /dev/** rw,
+
+  /data/** rw,
+  /tmp/** mrkwl,
+
+  ptrace (trace,read) peer=docker-default,
+
+  signal (receive) peer=docker-default,
+}

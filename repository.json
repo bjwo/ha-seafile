@@ -1,0 +1,6 @@
+{
+  "name": "ha-seafile",
+  "addons": [
+    "seafile"
+  ]
+}
