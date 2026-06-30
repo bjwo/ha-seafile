@@ -72,9 +72,7 @@ Create the three databases (`ccnet_db`, `seafile_db`, `seahub_db`) and grant the
 
 | Option | Required | Default | Description |
 |---|---|---|---|
-| `url` | Yes | `seafile.example.com` | Public URL of your Seafile instance (e.g. `https://files.example.com`). Used as `SERVICE_URL`. |
-| `FILE_SERVER_ROOT` | No | _(derived from `url`)_ | Override the file server URL if it differs from `url` on port 8082 (e.g. behind a split proxy). |
-| `PORT` | No | `8082` | File server port, used when auto-deriving `FILE_SERVER_ROOT`. |
+| `url` | Yes | `seafile.example.com` | Public URL of your Seafile instance (e.g. `https://files.example.com`). Used as `SERVICE_URL`. `FILE_SERVER_ROOT` is auto-derived from this on port 8082. |
 | `SEAFILE_ADMIN_EMAIL` | Yes | `me@example.com` | Admin account email |
 | `SEAFILE_ADMIN_PASSWORD` | Yes | `a_very_secret_password` | Admin account password |
 | `MYSQL_HOST` | Yes | `core-mariadb` | MariaDB hostname |
@@ -83,7 +81,6 @@ Create the three databases (`ccnet_db`, `seafile_db`, `seahub_db`) and grant the
 | `MYSQL_USER_PASSWD` | Yes* | _(empty)_ | MariaDB user password (*auto-discovered if HA MariaDB addon is running) |
 | `data_location` | Yes | `/share/seafile` | Path where Seafile synced data is stored |
 | `TZ` | No | `Europe/Paris` | Timezone |
-| `PUID` / `PGID` | No | `1000` | User/group ID for file ownership |
 
 ## Add-on configuration files
 

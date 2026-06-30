@@ -143,9 +143,6 @@ fi
 bashio::log.info "Configuring Seafile URLs"
 
 SERVICE_URL_CONFIG=$(bashio::config 'url')
-FILE_SERVER_ROOT_CONFIG=$(bashio::config 'FILE_SERVER_ROOT')
-FILE_PORT_CONFIG=$(bashio::config 'PORT')
-FILE_PORT="${FILE_PORT_CONFIG:-8082}"
 
 normalize_url() {
     local raw_url="${1%/}"
@@ -163,25 +160,11 @@ normalize_url() {
     fi
 }
 
-# Derive the scheme and host from url, then append the file server port.
-# Strip any existing port from url first so we get a clean host.
-_url_scheme_host() {
-    local u="$1"
-    # ensure scheme present
-    [[ "${u}" =~ ^https?:// ]] || u="http://${u}"
-    # strip path and port: take scheme + host only
-    printf '%s' "${u}" | sed -E 's|^(https?://[^/:]+).*|\1|'
-}
-
 SERVICE_URL_VALUE=$(normalize_url "${SERVICE_URL_CONFIG}" "http")
 
-if [[ -n "${FILE_SERVER_ROOT_CONFIG}" && "${FILE_SERVER_ROOT_CONFIG}" != "null" ]]; then
-    FILE_SERVER_ROOT_VALUE=$(normalize_url "${FILE_SERVER_ROOT_CONFIG}" "http")
-else
-    # Auto-derive: same scheme+host as url, but on the file server port
-    _base=$(_url_scheme_host "${SERVICE_URL_VALUE}")
-    FILE_SERVER_ROOT_VALUE="${_base}:${FILE_PORT}"
-fi
+# Auto-derive FILE_SERVER_ROOT: same scheme+host as url on port 8082
+_base=$(printf '%s' "${SERVICE_URL_VALUE}" | sed -E 's|^(https?://[^/:]+).*|\1|')
+FILE_SERVER_ROOT_VALUE="${_base}:8082"
 
 SEAHUB_CONF_DIRS=()
 if [[ -d "${DATA_LOCATION}/conf" || ! -d "${DATA_LOCATION}/seafile/conf" ]]; then
