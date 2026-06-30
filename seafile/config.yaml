@@ -117,5 +117,5 @@ services:
 slug: seafile
 udev: true
 url: https://github.com/bjwo/ha-seafile/tree/main/seafile
-version: "12.0.18-7"
+version: "12.0.18-8"
 webui: http://[HOST]:[PORT:8000]
