@@ -34,17 +34,11 @@ Default credentials on first start: `me@example.com` / `a_very_secret_password` 
    rights:
      - username: seafile
        host: "%"
-       database: ccnet_db
-       grant: true
-     - username: seafile
-       host: "%"
-       database: seafile_db
-       grant: true
-     - username: seafile
-       host: "%"
-       database: seahub_db
+       database: "*"
        grant: true
    ```
+
+   The `database: "*"` (ALL PRIVILEGES ON \*.\*) is required because Seafile's setup script queries `mysql.user` to verify the database user exists. The MariaDB addon port is only reachable by other addons on the same HA instance — it is not exposed externally.
 
 3. In the Seafile add-on configuration set:
    - `MYSQL_HOST`: `core-mariadb`

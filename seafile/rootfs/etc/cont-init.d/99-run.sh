@@ -202,9 +202,9 @@ export MYSQL_ROOT_PASSWD="${MYSQL_USER_PASSWD_CONFIG}"
 # Fix wait_for_db.sh to authenticate with the configured user
 sed -i 's|port=${MYSQL_PORT})|port=${MYSQL_PORT}, user="${MYSQL_USER}")|g' /home/seafile/wait_for_db.sh
 
-# Seafile setup scripts default to connecting as "root" to create databases.
-# Since databases are pre-created manually, patch them to use MYSQL_USER instead,
-# which has full grants on the three Seafile databases and allows remote connections.
+# Patch setup scripts: replace hardcoded 'root' user with MYSQL_USER.
+# This works because the seafile user is granted ALL PRIVILEGES ON *.* in the
+# MariaDB addon config, giving it the mysql.user access that the setup script needs.
 sed -i "s|user=\"root\"|user=\"${MYSQL_USER_CONFIG}\"|g" /home/seafile/clean_db.sh
 sed -i "s|'root'|'${MYSQL_USER_CONFIG}'|g" /opt/seafile/*/setup-seafile-mysql.sh 2>/dev/null || true
 sed -i "s|'root'|'${MYSQL_USER_CONFIG}'|g" /opt/seafile/*/setup-seafile-mysql.py 2>/dev/null || true
