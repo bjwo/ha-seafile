@@ -68,7 +68,6 @@ environment:
   NOSWAG: "1"
   PGID: "1000"
   PUID: "1000"
-image: ghcr.io/bjwo/seafile-{arch}
 map:
   - addon_config:rw
   - share:rw

@@ -1,49 +1,71 @@
+#============================#
+#  ALEXBELGIUM'S DOCKERFILE  #
+#============================#
+
+#################
+# 1 Build Image #
+#################
+
 ARG BUILD_FROM
-FROM $BUILD_FROM
+ARG BUILD_VERSION
+FROM ${BUILD_FROM}
+ENV BASHIO_VERSION=1.29.1
 
-ARG BASHIO_VERSION=1.29.1
+##################
+# 2 Modify Image #
+##################
 
-##############
-# S6 & Envs  #
-##############
-
-ENV S6_STAGE2_HOOK=/ha_entrypoint.sh \
+ENV S6_CMD_WAIT_FOR_SERVICES=1 \
     S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
-    S6_SERVICES_GRACETIME=3000 \
-    LANG=C.UTF-8
+    S6_SERVICES_GRACETIME=0
 
-################
-# Install apps #
-################
+ENV LANG C.UTF-8
 
-# Copy rootfs files
-COPY rootfs /
-
-# Install additional packages and bashio
-RUN \
-    # Create symlinks for shell compatibility
-    ln -s /bin/bash /usr/bin/bash 2>/dev/null || true && \
-    ln -s /bin/sh /usr/bin/sh 2>/dev/null || true && \
-    # Download addon infrastructure modules
-    curl -fsSL "https://raw.githubusercontent.com/alexbelgium/hassio-addons/master/.templates/ha_entrypoint.sh" \
-        -o /ha_entrypoint.sh && chmod +x /ha_entrypoint.sh && \
-    curl -fsSL "https://raw.githubusercontent.com/alexbelgium/hassio-addons/master/.templates/ha_entrypoint_helper.sh" \
-        -o /ha_entrypoint_helper.sh && chmod +x /ha_entrypoint_helper.sh && \
-    # Install bashio standalone
-    mkdir -p /usr/lib/bashio && \
-    curl -fsSL "https://github.com/hassio-addons/bashio/archive/refs/tags/v${BASHIO_VERSION}.tar.gz" \
-        | tar -xzf - --strip-components=2 -C /usr/lib/bashio bashio-${BASHIO_VERSION}/lib && \
-    ln -sf /usr/lib/bashio/bashio /usr/bin/bashio
-
-##############
-# Entrypoint #
-##############
-
-CMD ["/ha_entrypoint.sh"]
+USER root
 
 ##################
-# Labels         #
+# 3 Install apps #
 ##################
+
+# Copy local files
+COPY rootfs/ /
+RUN find . -type f \( -name "*.sh" -o -name "run" -o -name "finish" \) -print -exec chmod +x {} \;
+
+# hadolint ignore=DL4005
+RUN if [ ! -f /bin/sh ] && [ -f /usr/bin/sh ]; then ln -s /usr/bin/sh /bin/sh; fi && \
+    if [ ! -f /bin/bash ] && [ -f /usr/bin/bash ]; then ln -s /usr/bin/bash /bin/bash; fi
+
+# Modules
+ARG MODULES="00-banner.sh 01-custom_script.sh 01-config_yaml.sh 00-global_var.sh 00-local_mounts.sh 00-smb_mounts.sh"
+
+# Automatic modules download
+COPY ha_automodules.sh /ha_automodules.sh
+RUN chmod 744 /ha_automodules.sh && /ha_automodules.sh "$MODULES" && rm /ha_automodules.sh
+
+# Manual apps
+ENV PACKAGES="micro"
+
+# Automatic apps & bashio
+COPY ha_autoapps.sh /ha_autoapps.sh
+RUN chmod 744 /ha_autoapps.sh && /ha_autoapps.sh "$PACKAGES" && rm /ha_autoapps.sh
+
+################
+# 4 Entrypoint #
+################
+
+ENV S6_STAGE2_HOOK=/ha_entrypoint.sh
+COPY ha_entrypoint.sh /ha_entrypoint.sh
+RUN chmod 777 /ha_entrypoint.sh
+
+COPY bashio-standalone.sh /usr/local/lib/bashio-standalone.sh
+RUN chmod 0755 /usr/local/lib/bashio-standalone.sh
+
+ENTRYPOINT [ "/usr/bin/env" ]
+CMD [ "/ha_entrypoint.sh" ]
+
+############
+# 5 Labels #
+############
 
 ARG BUILD_ARCH
 ARG BUILD_DATE
@@ -52,22 +74,22 @@ ARG BUILD_NAME
 ARG BUILD_REF
 ARG BUILD_REPOSITORY
 ARG BUILD_VERSION
-
+ENV BUILD_VERSION="${BUILD_VERSION}"
 LABEL \
     io.hass.name="${BUILD_NAME}" \
     io.hass.description="${BUILD_DESCRIPTION}" \
     io.hass.arch="${BUILD_ARCH}" \
     io.hass.type="addon" \
     io.hass.version=${BUILD_VERSION} \
-    maintainer="bjwo" \
+    maintainer="bjwo (https://github.com/bjwo)" \
     org.opencontainers.image.title="${BUILD_NAME}" \
     org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
     org.opencontainers.image.vendor="bjwo ha-seafile" \
-    org.opencontainers.image.authors="bjwo" \
+    org.opencontainers.image.authors="bjwo (https://github.com/bjwo)" \
     org.opencontainers.image.licenses="MIT" \
-    org.opencontainers.image.url="https://github.com/bjwo/ha-seafile" \
-    org.opencontainers.image.source="https://github.com/bjwo/ha-seafile" \
-    org.opencontainers.image.documentation="https://github.com/bjwo/ha-seafile/blob/main/seafile/README.md" \
+    org.opencontainers.image.url="https://github.com/bjwo" \
+    org.opencontainers.image.source="https://github.com/${BUILD_REPOSITORY}" \
+    org.opencontainers.image.documentation="https://github.com/${BUILD_REPOSITORY}/blob/main/README.md" \
     org.opencontainers.image.created=${BUILD_DATE} \
     org.opencontainers.image.revision=${BUILD_REF} \
     org.opencontainers.image.version=${BUILD_VERSION}
