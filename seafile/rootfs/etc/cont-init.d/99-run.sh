@@ -220,16 +220,13 @@ MYSQL_HOST_CONFIG="$(bashio::config 'MYSQL_HOST' 2>/dev/null || true)"
 MYSQL_PORT_CONFIG="$(bashio::config 'MYSQL_PORT' 2>/dev/null || true)"
 MYSQL_USER_CONFIG="$(bashio::config 'MYSQL_USER' 2>/dev/null || true)"
 MYSQL_USER_PASSWD_CONFIG="$(bashio::config 'MYSQL_USER_PASSWD' 2>/dev/null || true)"
-MYSQL_ROOT_PASSWD_CONFIG="$(bashio::config 'MYSQL_ROOT_PASSWD' 2>/dev/null || true)"
 
-# If password fields are empty, try to discover credentials from the HA MariaDB addon service
-if [[ -z "${MYSQL_USER_PASSWD_CONFIG}" || "${MYSQL_USER_PASSWD_CONFIG}" == "null" ]] \
-    || [[ -z "${MYSQL_ROOT_PASSWD_CONFIG}" || "${MYSQL_ROOT_PASSWD_CONFIG}" == "null" ]]; then
+# If password is empty, try to discover credentials from the HA MariaDB addon service
+if [[ -z "${MYSQL_USER_PASSWD_CONFIG}" || "${MYSQL_USER_PASSWD_CONFIG}" == "null" ]]; then
 
     if bashio::services.available 'mysql'; then
         bashio::log.info "Discovered MariaDB service — reading credentials from HA service API"
-        MYSQL_USER_PASSWD_CONFIG="${MYSQL_USER_PASSWD_CONFIG:-$(bashio::services 'mysql' 'password')}"
-        MYSQL_ROOT_PASSWD_CONFIG="${MYSQL_ROOT_PASSWD_CONFIG:-$(bashio::services 'mysql' 'password')}"
+        MYSQL_USER_PASSWD_CONFIG="$(bashio::services 'mysql' 'password')"
 
         # Override host/port/user from service if not explicitly set
         if [[ -z "${MYSQL_HOST_CONFIG}" || "${MYSQL_HOST_CONFIG}" == "null" ]]; then
@@ -242,10 +239,14 @@ if [[ -z "${MYSQL_USER_PASSWD_CONFIG}" || "${MYSQL_USER_PASSWD_CONFIG}" == "null
             MYSQL_USER_CONFIG="$(bashio::services 'mysql' 'username')"
         fi
     else
-        bashio::log.fatal "MariaDB is required. Either provide MYSQL_USER_PASSWD and MYSQL_ROOT_PASSWD in addon options, or install and start the MariaDB addon."
+        bashio::log.fatal "MariaDB is required. Either provide MYSQL_USER_PASSWD in addon options, or install and start the MariaDB addon."
         bashio::exit.nok "No database credentials available"
     fi
 fi
+
+# MYSQL_ROOT_PASSWD is only used by Seafile's first-run setup scripts to create
+# databases — since the user creates these manually, we simply reuse the user password.
+MYSQL_ROOT_PASSWD_CONFIG="${MYSQL_USER_PASSWD_CONFIG}"
 
 # Validate we have all required values
 if [[ -z "${MYSQL_HOST_CONFIG}" || "${MYSQL_HOST_CONFIG}" == "null" ]]; then

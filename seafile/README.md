@@ -51,9 +51,8 @@ Default credentials on first start: `me@example.com` / `a_very_secret_password` 
    - `MYSQL_PORT`: `3306`
    - `MYSQL_USER`: `seafile`
    - `MYSQL_USER_PASSWD`: the password you set above
-   - `MYSQL_ROOT_PASSWD`: the MariaDB root / service password (found in the MariaDB add-on logs or configuration)
 
-   If you leave `MYSQL_USER_PASSWD` and `MYSQL_ROOT_PASSWD` empty, the add-on will try to auto-discover credentials from the HA MariaDB service API.
+   If you leave `MYSQL_USER_PASSWD` empty, the add-on will try to auto-discover credentials from the HA MariaDB service API.
 
 ### Option B — External MariaDB server
 
@@ -83,7 +82,6 @@ Create the three databases (`ccnet_db`, `seafile_db`, `seahub_db`) and grant the
 | `MYSQL_PORT` | No | `3306` | MariaDB port |
 | `MYSQL_USER` | Yes | `seafile` | MariaDB username |
 | `MYSQL_USER_PASSWD` | Yes* | _(empty)_ | MariaDB user password (*auto-discovered if HA MariaDB addon is running) |
-| `MYSQL_ROOT_PASSWD` | Yes* | _(empty)_ | MariaDB root password (*auto-discovered if HA MariaDB addon is running) |
 | `data_location` | Yes | `/share/seafile` | Path where Seafile data is stored |
 | `TZ` | No | `Europe/Paris` | Timezone |
 | `PUID` / `PGID` | No | `1000` | User/group ID for file ownership |

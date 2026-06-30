@@ -90,7 +90,6 @@ options:
   MYSQL_PORT: "3306"
   MYSQL_USER: seafile
   MYSQL_USER_PASSWD: ""
-  MYSQL_ROOT_PASSWD: ""
 panel_admin: false
 panel_icon: mdi:library
 ports:
@@ -127,7 +126,6 @@ schema:
   MYSQL_PORT: str
   MYSQL_USER: str
   MYSQL_USER_PASSWD: password
-  MYSQL_ROOT_PASSWD: password
 services:
   - mysql:want
 slug: seafile
