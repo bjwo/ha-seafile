@@ -202,10 +202,12 @@ export MYSQL_ROOT_PASSWD="${MYSQL_USER_PASSWD_CONFIG}"
 # Fix wait_for_db.sh to authenticate with the configured user
 sed -i 's|port=${MYSQL_PORT})|port=${MYSQL_PORT}, user="${MYSQL_USER}")|g' /home/seafile/wait_for_db.sh
 
-# Seafile setup scripts expect a "root" user; patch them to use the configured user
-sed -i 's|user="root"|user="service"|g' /home/seafile/clean_db.sh
-sed -i "s|'root'|'service'|g" /opt/seafile/*/setup-seafile-mysql.sh 2>/dev/null || true
-sed -i "s|'root'|'service'|g" /opt/seafile/*/setup-seafile-mysql.py 2>/dev/null || true
+# Seafile setup scripts default to connecting as "root" to create databases.
+# Since databases are pre-created manually, patch them to use MYSQL_USER instead,
+# which has full grants on the three Seafile databases and allows remote connections.
+sed -i "s|user=\"root\"|user=\"${MYSQL_USER_CONFIG}\"|g" /home/seafile/clean_db.sh
+sed -i "s|'root'|'${MYSQL_USER_CONFIG}'|g" /opt/seafile/*/setup-seafile-mysql.sh 2>/dev/null || true
+sed -i "s|'root'|'${MYSQL_USER_CONFIG}'|g" /opt/seafile/*/setup-seafile-mysql.py 2>/dev/null || true
 
 bashio::log.info "MariaDB configured: ${MYSQL_USER}@${MYSQL_HOST_RESOLVED}:${MYSQL_PORT_RESOLVED}"
 bashio::log.warning "This addon uses an external MariaDB database."
